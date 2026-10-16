@@ -1,0 +1,78 @@
+{
+  "name": "dsh-lighthouse",
+  "version": "0.1.0",
+  "description": "One screen for every work you have shipped: local project facts, GitHub stars and last push, whether the plugin market has picked it up and how many downloads it has, plus pending pull-request wait times against the upstream median.",
+  "type": "module",
+  "main": "lib/index.js",
+  "bin": {
+    "dsh-lighthouse": "bin/dsh-lighthouse.mjs"
+  },
+  "exports": {
+    ".": "./lib/index.js",
+    "./fleet": "./lib/fleet.js",
+    "./collect": "./lib/collect.js",
+    "./render": "./lib/render.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "bin",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "dashboard",
+    "release-tracker",
+    "market-registry",
+    "downloads",
+    "pull-request",
+    "observability",
+    "作品看板",
+    "收录状态"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node test/smoke.mjs"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/7gzgn/dsh-lighthouse.git"
+  },
+  "homepage": "https://github.com/7gzgn/dsh-lighthouse#readme",
+  "bugs": {
+    "url": "https://github.com/7gzgn/dsh-lighthouse/issues"
+  },
+  "dsh": {
+    "compatibility": {
+      "dshReleases": {
+        "0.2.0-rc.2": "compatible"
+      }
+    },
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": ">=4.0.4 <5.0.0",
+    "@deepseek-ai/dsh-system-prompt": ">=0.2.0-rc.2 <0.3.0-0",
+    "@deepseek-ai/dsh-tools": ">=0.2.0-rc.2 <0.3.0-0"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/dsh-system-prompt": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-tools": {
+      "optional": true
+    }
+  }
+}
