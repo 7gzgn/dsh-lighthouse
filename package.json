@@ -1,6 +1,6 @@
 {
   "name": "dsh-lighthouse",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "description": "One screen for every work you have shipped: local project facts, GitHub stars, watchers and open comments, whether the plugin market has picked it up and how many downloads it has, plus pending pull-request wait times against the upstream median - with a watch panel inside the DSH GUI.",
   "type": "module",
   "main": "lib/index.js",
