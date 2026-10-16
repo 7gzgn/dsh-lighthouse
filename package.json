@@ -1,7 +1,7 @@
 {
   "name": "dsh-lighthouse",
-  "version": "0.1.0",
-  "description": "One screen for every work you have shipped: local project facts, GitHub stars and last push, whether the plugin market has picked it up and how many downloads it has, plus pending pull-request wait times against the upstream median.",
+  "version": "0.2.0",
+  "description": "One screen for every work you have shipped: local project facts, GitHub stars, watchers and open comments, whether the plugin market has picked it up and how many downloads it has, plus pending pull-request wait times against the upstream median - with a watch panel inside the DSH GUI.",
   "type": "module",
   "main": "lib/index.js",
   "bin": {
@@ -12,11 +12,14 @@
     "./fleet": "./lib/fleet.js",
     "./collect": "./lib/collect.js",
     "./render": "./lib/render.js",
+    "./status-route": "./lib/status-route.js",
+    "./client": "./client.js",
     "./package.json": "./package.json"
   },
   "files": [
     "lib",
     "bin",
+    "client.js",
     "cordis.patch.yml",
     "README.md",
     "LICENSE"
@@ -29,10 +32,11 @@
     "release-tracker",
     "market-registry",
     "downloads",
+    "watchers",
     "pull-request",
     "observability",
     "作品看板",
-    "收录状态"
+    "观察区"
   ],
   "engines": {
     "node": ">=18"
@@ -60,14 +64,24 @@
     },
     "bundle": {
       "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-slots"
+      ]
     }
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": ">=4.0.4 <5.0.0",
+    "@deepseek-ai/dsh-client-ui-slots": ">=0.2.0-rc.2 <0.3.0-0",
     "@deepseek-ai/dsh-system-prompt": ">=0.2.0-rc.2 <0.3.0-0",
     "@deepseek-ai/dsh-tools": ">=0.2.0-rc.2 <0.3.0-0"
   },
   "peerDependenciesMeta": {
+    "@deepseek-ai/dsh-client-ui-slots": {
+      "optional": true
+    },
     "@deepseek-ai/dsh-system-prompt": {
       "optional": true
     },
