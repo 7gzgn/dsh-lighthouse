@@ -1,7 +1,7 @@
 {
   "name": "dsh-lighthouse",
-  "version": "0.2.4",
-  "description": "One screen for every work you have shipped: local project facts, GitHub stars, watchers and open comments, whether the plugin market has picked it up and how many downloads it has, plus pending pull-request wait times against the upstream median - with a watch panel inside the DSH GUI.",
+  "version": "0.2.5",
+  "description": "One screen for every work you have shipped: local project facts, GitHub stars, watchers and open comments, whether the plugin market has picked it up and how many downloads it has, plus pending pull-request wait times against the upstream median - with a watch panel inside the DSH GUI. Past a dozen works it switches to a compact, urgency-sorted grid that stays readable at 50+.",
   "type": "module",
   "main": "lib/index.js",
   "bin": {
