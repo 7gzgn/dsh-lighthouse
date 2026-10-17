@@ -56,6 +56,9 @@ window.__ModuleLoader__.load({ id: "dsh-lighthouse", factory: (require) => {
 .lh-card.bad { border-left-color: #f85149; }
 .lh-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
 .lh-name { font-size: 13.5px; font-weight: 650; font-family: ui-monospace, Consolas, monospace; }
+.lh-zh { font-size: 11.5px; opacity: .72; }
+.lh-link { color: inherit; text-decoration: none; border-bottom: 1px dashed rgba(128,128,128,.55); }
+.lh-link:hover { color: #58a6ff; border-bottom-color: #58a6ff; }
 .lh-tag { font-size: 10.5px; opacity: .58; border: 1px solid rgba(128,128,128,.3); border-radius: 999px; padding: 0 7px; }
 .lh-line { font-size: 12.5px; margin-top: 4px; display: flex; gap: 12px; flex-wrap: wrap; }
 .lh-k { opacity: .58; }
@@ -166,10 +169,21 @@ window.__ModuleLoader__.load({ id: "dsh-lighthouse", factory: (require) => {
       stateLine.push(h("span", { key: "nopr", className: "lh-state lh-dim" }, "· 没有收录 PR"))
     }
 
+    // 中文名（名册 nameZh 优先）+ 直达链接（GitHub；有市场条目页就再给一个）
+    const zh = (work && work.nameZh) || (local && local.displayName) || ""
+    const link = (item.links && item.links.github) || null
+    const marketLink = (item.links && item.links.market) || null
+
     return h("div", { className: cls },
       h("div", { className: "lh-row" },
-        h("span", { className: "lh-name" }, work.name || "?"),
+        link
+          ? h("a", { className: "lh-name lh-link", href: link, target: "_blank", rel: "noreferrer" }, work.name || "?")
+          : h("span", { className: "lh-name" }, work.name || "?"),
+        zh ? h("span", { className: "lh-zh" }, zh) : null,
         work.category ? h("span", { className: "lh-tag" }, work.category) : null,
+        marketLink
+          ? h("a", { className: "lh-zh lh-link", href: marketLink, target: "_blank", rel: "noreferrer", title: "市场条目页" }, "市场 →")
+          : null,
         h("span", { className: "lh-sub", style: { marginLeft: "auto" } },
           "本地 " + (local.available === true ? (local.version || "?") + " · " + (local.files || 0) + " 文件" : "读不到"))
       ),
