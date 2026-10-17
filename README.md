@@ -104,14 +104,24 @@ dsh-lighthouse fleet  [--fleet <路径>]
 | --- | --- | --- |
 | 本地工程 | `package.json` 的版本、文件数、有没有 `test/smoke.mjs` | 只读文件 |
 | GitHub API | 仓库是否存在、star/fork、最后推送、**我开的收录 PR 状态** | 需要 PAT（`repo` scope）时更全 |
-| 市场接口 | `GET <marketUrl>/dsh-market/registry`（**要同源头**，否则被拒） | 默认 `http://127.0.0.1:19387`；登记表**只拉一次** |
+| 市场接口 | `GET <marketUrl>/dsh-market/registry`（**要同源头**，否则被拒） | **默认取宿主 web 服务的 origin**（`ctx.get('webServer').getOrigin()`，比如 `http://127.0.0.1:56497`）；登记表只拉一次、进程内缓存 5 分钟 |
 | npm registry | 包在不在 | 默认开，`--no-npm` / `includeNpm:false` 可关 |
+
+> **市场地址为什么不能再写死端口**：登记表路由挂在宿主自己的 web 服务上，端口每次启动都可能变；
+> 写死 `19387` 的后果不是报错，而是报告里一片 **0 收录 / 0 下载** —— 看起来像"没人用"，
+> 其实是"没读到"。v0.2.4 起：默认向 `webServer.getOrigin()` 要地址；**读不到时整行不报数**，
+> 并明确写"市场数据读不到（不显示 0，免得被当成没人用）"。
 
 PAT 依次找：`tokenFile` → 环境变量 `DSH_SLIPWAY_TOKEN_FILE` → `~/.dsh/.gh-token` → `D:\dsh\.gh-token`。
 
+## 它还会替你盯一件事
+
+**哪些收录 PR 已经等了超过上游中位数**。报告里单独一行点名（`#编号（等了多久）`），
+没有超的也明说"都还在正常等待区间" —— 这样"要不要去催"不用自己算。
+
 ## 兼容性
 
-- 运行时：**DSH 0.2.0-rc.2**（实测使用的版本）。
+- 运行时：**DSH 0.2.1-rc.2**（实测使用的版本）。
 - `peerDependencies` 用显式范围；拿不到 `@deepseek-ai/dsh-tools` 时 `defineTool` 退化成恒等（CLI/测试照常）。
 - 插件只注册工具与一段提示词，不挂任何前台服务、不轮询、不占资源（只在被调用时跑一次）。
 
