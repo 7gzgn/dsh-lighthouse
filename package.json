@@ -1,6 +1,6 @@
 {
   "name": "dsh-lighthouse",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "One screen for every work you have shipped: Chinese display names, clickable links to each source, local project facts, GitHub stars and last push, market listing and downloads, plus pending pull-request wait times against the upstream median - with a watch panel inside the DSH GUI. Past a dozen works it switches to a compact, urgency-sorted grid that stays readable at 50+.",
   "type": "module",
   "main": "lib/index.js",
