@@ -21,7 +21,7 @@ window.__ModuleLoader__.load({ id: "dsh-lighthouse", factory: (require) => {
 
   const react = require("react")
   const h = react.createElement
-  const { useCallback, useEffect, useState } = react
+  const { useCallback, useEffect, useRef, useState } = react
 
   const name = "dsh-lighthouse"
   const inject = ["slots"]
@@ -37,7 +37,8 @@ window.__ModuleLoader__.load({ id: "dsh-lighthouse", factory: (require) => {
     const node = document.createElement("style")
     node.id = id
     node.textContent = `
-.lh-root { padding: 18px 22px 40px; max-width: 900px; margin: 0 auto; color: inherit; }
+.lh-root { padding: 18px 22px 40px; max-width: 900px; margin: 0 auto; color: inherit;
+  box-sizing: border-box; height: 100%; overflow-y: auto; }
 .lh-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
 .lh-title { font-size: 18px; font-weight: 650; margin: 0; }
 .lh-sub { font-size: 12px; opacity: .62; }
@@ -67,6 +68,8 @@ window.__ModuleLoader__.load({ id: "dsh-lighthouse", factory: (require) => {
 .lh-dim { opacity: .55; }
 .lh-err { color: #f85149; font-size: 12.5px; margin: 8px 0; }
 .lh-empty { opacity: .6; font-size: 13px; padding: 24px 0; text-align: center; }
+.lh-fx { position: fixed; inset: 0; width: 100vw; height: 100vh;
+  pointer-events: none; z-index: 9999; }
 `
     document.head.appendChild(node)
   }
@@ -202,6 +205,118 @@ window.__ModuleLoader__.load({ id: "dsh-lighthouse", factory: (require) => {
     const { loading, report, error, at, reload } = useStatus()
     const s = (report && report.summary) || null
 
+    /* ---------------- 刷新粒子特效：跟重启坞同款的粒子海浪 ---------------- */
+    const [fxOn, setFxOn] = useState(false)
+    const fxEndRef = useRef(null)
+    const fxCanvasRef = useRef(null)
+
+    function playFx(after) {
+      fxEndRef.current = typeof after === "function" ? after : null
+      setFxOn(true)
+    }
+
+    // 调试入口：不用点刷新也能放一次特效
+    useEffect(function () {
+      const trigger = function () { playFx() }
+      window.__dshLighthouseFx = trigger
+      return function () {
+        if (window.__dshLighthouseFx === trigger) delete window.__dshLighthouseFx
+      }
+    }, [])
+
+    useEffect(function () {
+      if (!fxOn) return undefined
+      const canvas = fxCanvasRef.current
+      if (!canvas) { setFxOn(false); return undefined }
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      const W = window.innerWidth
+      const H = window.innerHeight
+      canvas.width = Math.round(W * dpr)
+      canvas.height = Math.round(H * dpr)
+      const ctx = canvas.getContext("2d")
+      if (!ctx) { setFxOn(false); return undefined }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+
+      const DURATION = 2000
+      const TAU = Math.PI * 2
+      const diag = Math.hypot(W, H)
+      const dirX = W / diag
+      const dirY = H / diag
+      const STEP = 22
+      const KEEP = 0.22
+      const parts = []
+      for (let y = -STEP; y < H + STEP; y += STEP) {
+        for (let x = -STEP; x < W + STEP; x += STEP) {
+          if (Math.random() > KEEP) continue
+          parts.push({
+            x: x + (Math.random() - 0.5) * STEP * 0.9,
+            y: y + (Math.random() - 0.5) * STEP * 0.9,
+            s: (x * dirX + y * dirY) / diag,
+            jitter: 0.55 + Math.random() * 0.45,
+            hue: 194 + Math.random() * 42,
+          })
+        }
+      }
+
+      let raf = 0
+      let finished = false
+      const begin = performance.now()
+
+      const frame = function (now) {
+        if (finished) return
+        const t = Math.min(1, (now - begin) / DURATION)
+        if (t >= 1) {
+          finished = true
+          ctx.clearRect(0, 0, W, H)
+          const cb = fxEndRef.current
+          fxEndRef.current = null
+          setFxOn(false)
+          if (typeof cb === "function") cb()
+          return
+        }
+        ctx.clearRect(0, 0, W, H)
+        ctx.globalCompositeOperation = "lighter"
+        const travel = t * 3
+        for (const q of parts) {
+          const phase = q.s * TAU * 2.2 - travel * TAU * 0.55
+          const wave =
+            Math.sin(phase) * 0.62 +
+            Math.sin(phase * 1.93 + 1.7) * 0.26 +
+            Math.sin(phase * 0.47 + 3.1) * 0.12
+          if (wave <= 0) continue
+          const lum = Math.pow(wave, 1.9) * q.jitter
+          if (lum <= 0.02) continue
+          const depth = 0.75 + q.s * 0.55
+          const size = (1.1 + lum * 6.4) * depth
+          const light = 58 + lum * 38
+          const arm = size * (1.7 + lum * 1.7)
+          const thick = Math.max(1.0, size * 0.46)
+          if (lum > 0.35) {
+            ctx.globalAlpha = Math.min(0.34, lum * 0.3)
+            ctx.fillStyle = "hsl(" + q.hue + " 100% 78%)"
+            ctx.beginPath()
+            ctx.arc(q.x, q.y, arm * 0.85, 0, TAU)
+            ctx.fill()
+          }
+          ctx.globalAlpha = Math.min(1, lum * 1.75)
+          ctx.fillStyle = "hsl(" + q.hue + " 96% " + light + "%)"
+          ctx.fillRect(q.x - arm, q.y - thick / 2, arm * 2, thick)
+          ctx.fillRect(q.x - thick / 2, q.y - arm, thick, arm * 2)
+          ctx.beginPath()
+          ctx.arc(q.x, q.y, thick * 1.15, 0, TAU)
+          ctx.fill()
+        }
+        ctx.globalAlpha = 1
+        ctx.globalCompositeOperation = "source-over"
+        raf = requestAnimationFrame(frame)
+      }
+      raf = requestAnimationFrame(frame)
+      return function () {
+        finished = true
+        cancelAnimationFrame(raf)
+      }
+    }, [fxOn])
+
     const body = []
     if (error !== null) {
       body.push(h("div", { className: "lh-err", key: "err" }, "读不到：" + error))
@@ -223,12 +338,18 @@ window.__ModuleLoader__.load({ id: "dsh-lighthouse", factory: (require) => {
     }
 
     return h("div", { className: "lh-root" },
+      fxOn ? h("canvas", { className: "lh-fx", ref: fxCanvasRef }) : null,
       h("div", { className: "lh-head" },
         h("h1", { className: "lh-title" }, "🚢 作品观察区"),
         h("span", { className: "lh-sub" },
           at ? "更新于 " + shortTime(new Date(at).toISOString())
              : (report && report.generatedAt ? "数据 " + shortTime(report.generatedAt) : "")),
-        h("button", { className: "lh-btn", onClick: reload, disabled: loading === true, type: "button" },
+        h("button", {
+          className: "lh-btn",
+          onClick: function () { if (loading === true) return; playFx(reload) },
+          disabled: loading === true,
+          type: "button",
+        },
           loading === true ? "刷新中…" : "刷新")
       ),
       h("div", { className: "lh-sub", style: { marginTop: "6px" } },
