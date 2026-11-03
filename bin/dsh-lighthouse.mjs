@@ -110,7 +110,9 @@ async function main() {
       const bits = [];
       bits.push(local.available === true ? `本地 ${local.version ?? '?'}` : '本地 读不到');
       bits.push(github.exists === true ? `star ${github.stars}` : 'GitHub 无/读不到');
-      bits.push(market.listed === true ? `市场已收录（${market.downloads} 下载）` : (market.available === true ? '市场未收录' : '市场读不到'));
+      bits.push(market.listed !== true
+        ? (market.available === true ? '市场未收录' : '市场读不到')
+        : (market.downloads === null || market.downloads === undefined ? '市场已收录（下载数暂无）' : `市场已收录（${market.downloads} 下载）`));
       if (github.pr) bits.push(`PR #${github.pr.number} ${github.pr.mergedAt ? '已合并' : github.pr.state}`);
       console.log(`  · ${work.name}：${bits.join('｜')}`);
     }
