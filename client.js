@@ -160,7 +160,7 @@ window.__ModuleLoader__.load({ id: "dsh-lighthouse", factory: (require) => {
       released ? "✅ 已发布" : (gh.exists === false ? "❌ 仓库不存在" : "❌ 读不到仓库")))
     stateLine.push(h("span", { key: "mk", className: "lh-state" },
       listed
-        ? "✅ 市场已收录" + (market.downloads !== undefined ? "（下载 " + market.downloads + "）" : "")
+        ? "✅ 市场已收录" + (market.downloads === null || market.downloads === undefined ? "（下载数暂无）" : "（下载 " + market.downloads + "）")
         : (market.available === true ? "⏳ 收录中" : "❌ 市场读不到")))
     if (pr) {
       const waited = (Date.now() - Date.parse(pr.createdAt)) / 3600000
